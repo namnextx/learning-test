@@ -73,7 +73,7 @@ class StudentControllerTest {
                 .andExpect(status().isOk());
 
         verify(studentService, times(1)).registerStudent(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue().getName()).isEqualTo("taomanhduc");
+        assertThat(argumentCaptor.getValue().getName()).isEqualTo("Tao Manh Duc");
         assertThat(argumentCaptor.getValue().getEmail()).isEqualTo("taomd@nguy.com");
     }
 

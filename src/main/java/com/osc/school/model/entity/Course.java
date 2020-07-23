@@ -1,7 +1,12 @@
 package com.osc.school.model.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.Entity;
@@ -18,7 +23,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity(name = "course")
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Course implements Serializable {
     private static final long serialVersionUID = 4439354730164315696L;
     @Id

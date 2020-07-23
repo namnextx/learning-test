@@ -27,10 +27,16 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.linesOf;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -61,7 +67,6 @@ class CourseControllerTest {
     @Mock
     private CourseFilter courseFilter;
 
-    @Mock
     private Course courseRegister;
 
     @Mock
@@ -69,8 +74,9 @@ class CourseControllerTest {
 
     @BeforeEach
     void setUpTest() {
-        courseFilter = new CourseFilter("xic bic", 20, LocalDate.of(2020,7,23));
+        courseFilter = new CourseFilter("xic bic", 20, LocalDate.of(2020, 7, 23));
         courseFilterInvalid = new CourseFilter("xic bic", 20, null);
+        courseRegister = new Course();
         courseRegister.setCourseName("Chibi");
         courseRegister.setCourseSize(30);
         courseRegister.setFromDate(LocalDate.of(2020, 3, 2));
@@ -85,22 +91,22 @@ class CourseControllerTest {
     @Test
     void testCoursesRequestMatching() throws Exception {
         mockMvc.perform(get("/api/courses")
-                        .param("student-email", "taomd@nguy.com"))
-                        .andExpect(status().isOk());
+                .param("student-email", "taomd@nguy.com"))
+                .andExpect(status().isOk());
     }
 
     @Test
     void testCoursesRequestInvalidStudentEmail_ThenReturn400() throws Exception {
         mockMvc.perform(get("/api/courses")
-                        .param("student-email", ""))
-                        .andExpect(status().isBadRequest());
+                .param("student-email", ""))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void testCourseRequestValidThenMapsToParam() throws Exception {
         String emailParams = "taothao@nguy.com";
         mockMvc.perform(get("/api/courses")
-                        .param("student-email", emailParams));
+                .param("student-email", emailParams));
         verify(courseService, times(1)).findCourseByStudentEmail((String) argumentCaptor.capture());
         then(argumentCaptor.getValue()).isEqualTo("taothao@nguy.com");
     }
@@ -125,33 +131,33 @@ class CourseControllerTest {
 
     @Test
     void testCourseRequestInvalidEmailThenReturns400AndErrorMessage() throws Exception {
-      ErrorResponse expectedErrorResponse = new ErrorResponse("400", "Invalid data input");
+        ErrorResponse expectedErrorResponse = new ErrorResponse("400", "Invalid data input");
         mockMvc.perform(get("/api/courses")
-                         .param("student-email", "taom")
-                         .contentType("application/json"))
+                .param("student-email", "taom")
+                .contentType("application/json"))
                 .andExpect(responseBody.containsObjectAsJson(expectedErrorResponse, ErrorResponse.class));
     }
 
 
     @Test
-    void testCourseFilterSerializationOK() throws Exception{
+    void testCourseFilterSerializationOK() throws Exception {
         mockMvc.perform(post(URI_COURSE_FILTER)
-                    .param("page", "1")
-                    .param("size", "10")
-                    .param("sort", "id,desc")
-                    .content(objectMapper.writeValueAsString(courseFilter))
-                    .contentType("application/json"))
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort", "id,desc")
+                .content(objectMapper.writeValueAsString(courseFilter))
+                .contentType("application/json"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void testCourseFilterBusinessOK() throws Exception {
         mockMvc.perform(post(URI_COURSE_FILTER)
-                    .content(objectMapper.writeValueAsString(courseFilter))
-                    .contentType("application/json")
-                    .param("page", "1")
-                    .param("size", "10")
-                    .param("sort", "id,desc"))
+                .content(objectMapper.writeValueAsString(courseFilter))
+                .contentType("application/json")
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort", "id,desc"))
                 .andExpect(status().isOk());
         verify(courseService, times(1))
                 .filterCourses(filterArgumentCaptor.capture(), (Pageable) argumentCaptor.capture());
@@ -172,18 +178,63 @@ class CourseControllerTest {
     void testCourseFilterHandleExceptionFieldInvalid() throws Exception {
         ErrorResponse errorResponse = new ErrorResponse("400", "Invalid data request");
         mockMvc.perform(post(URI_COURSE_FILTER)
-        .content(objectMapper.writeValueAsString(courseFilterInvalid))
-        .contentType("application/json"))
-        .andExpect(status().isBadRequest())
-        .andExpect(responseBody.containsObjectAsJson(errorResponse, ErrorResponse.class));
+                .content(objectMapper.writeValueAsString(courseFilterInvalid))
+                .contentType("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(responseBody.containsObjectAsJson(errorResponse, ErrorResponse.class));
     }
 
     @Test
-    void testRegisterCourseSerialization() throws Exception{
+    void testRegisterCourseSerialization() throws Exception {
         mockMvc.perform(post(URI_COURSE)
-                        .content(objectMapper.writeValueAsString(courseRegister))
-                        .contentType("application/json"))
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(courseRegister)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void testRegisterCourseBusinessOK() throws Exception {
+/*        mockMvc.perform(post(URI_COURSE)
+                    .content(objectMapper.writeValueAsString(courseRegister))
+                    .contentType("application/json"))
+                .andExpect(status().isOk());
+        verify(courseService, times(1)).createCourse((Course)argumentCaptor.capture());
+        Course courseRegistered = (Course) argumentCaptor.getValue();
+        then(courseRegistered.getCourseName()).isEqualTo("Chibi");
+        then(courseRegistered.getCourseSize()).isEqualTo(30);
+        then(courseRegistered.getFromDate()).isEqualTo(LocalDate.of(2020, 3, 2));
+        then(courseRegistered.getToDate()).isEqualTo(LocalDate.of(2020, 10, 2));*/
+
+        Map<Integer, Integer> map = new HashMap<>();
+        int[] as = new int[]{1, 2, 5, 62, 1, 2, 4};
+        Set<Integer> as1 = Arrays.stream(as).parallel().boxed().collect(Collectors.toSet());
+
+        int[] bs = new int[]{1, 2, 5, 5, 7, 9, 62, 1, 2, 4};
+        Set<Integer> ls = new HashSet<>();
+        for (int b : bs) {
+            if (!as1.contains(b)) {
+                ls.add(b);
+            }
+        }
+       /* for (int a : as) {
+            map.put(a, map.getOrDefault(a, 0) + 1);
+        }
+        for (int b : bs) {
+            if (map.get(b) == null) {
+                ls.add(b);
+            } else {
+                map.put(b, map.get(b) - 1);
+                 if (map.get(b) == 0) {
+                     map.remove(b);
+                 }
+            }
+        }
+        map.forEach((k, v) -> {
+            for (Integer i = 0; i < v; i++) {
+                ls.add(k);
+            }
+        });*/
+        System.out.println(Arrays.toString(ls.toArray()));
     }
 
 

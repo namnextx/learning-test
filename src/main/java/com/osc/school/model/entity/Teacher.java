@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.osc.school.validator.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,10 +26,11 @@ import java.util.List;
 * @since : 21/7/2020
 */
 
-@Data
 @Entity(name = "teacher")
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Teacher implements Serializable {
     @Id
     @GeneratedValue
