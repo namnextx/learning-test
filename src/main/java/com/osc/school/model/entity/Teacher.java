@@ -36,7 +36,6 @@ public class Teacher implements Serializable {
     @GeneratedValue
     private Long id;
 
-    @NotNull
     @NotEmpty
     private String teacherName;
 

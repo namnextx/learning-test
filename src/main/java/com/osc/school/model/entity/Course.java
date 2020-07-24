@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class Course implements Serializable {
     @GeneratedValue
     private Long id;
 
-    @NotEmpty
+    @NotBlank
     private String courseName;
 
     @Min(value = 1)

@@ -31,7 +31,6 @@ public class Student implements Serializable{
     @GeneratedValue
     private Long id;
 
-    @NotNull
     @NotBlank
     private String name;
 

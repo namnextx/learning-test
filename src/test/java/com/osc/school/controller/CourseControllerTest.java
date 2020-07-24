@@ -68,6 +68,7 @@ class CourseControllerTest {
     private CourseFilter courseFilter;
 
     private Course courseRegister;
+    private Course courseRegisterInvalid;
 
     @Mock
     private CourseFilter courseFilterInvalid;
@@ -83,6 +84,14 @@ class CourseControllerTest {
         courseRegister.setToDate(LocalDate.of(2020, 10, 2));
         courseRegister.setStudent(Collections.emptyList());
         courseRegister.setTeacher(new Teacher());
+
+        courseRegisterInvalid = new Course();
+        courseRegisterInvalid.setCourseName("Tao manh Duc");
+        courseRegisterInvalid.setCourseSize(51);
+        courseRegisterInvalid.setFromDate(LocalDate.of(2020, 3, 2));
+        courseRegisterInvalid.setToDate(LocalDate.of(2020, 10, 2));
+        courseRegisterInvalid.setStudent(Collections.emptyList());
+        courseRegisterInvalid.setTeacher(new Teacher());
     }
 
     private static final String URI_COURSE_FILTER = "/api/courses/filter";
@@ -194,7 +203,7 @@ class CourseControllerTest {
 
     @Test
     void testRegisterCourseBusinessOK() throws Exception {
-/*        mockMvc.perform(post(URI_COURSE)
+        mockMvc.perform(post(URI_COURSE)
                     .content(objectMapper.writeValueAsString(courseRegister))
                     .contentType("application/json"))
                 .andExpect(status().isOk());
@@ -203,38 +212,17 @@ class CourseControllerTest {
         then(courseRegistered.getCourseName()).isEqualTo("Chibi");
         then(courseRegistered.getCourseSize()).isEqualTo(30);
         then(courseRegistered.getFromDate()).isEqualTo(LocalDate.of(2020, 3, 2));
-        then(courseRegistered.getToDate()).isEqualTo(LocalDate.of(2020, 10, 2));*/
+        then(courseRegistered.getToDate()).isEqualTo(LocalDate.of(2020, 10, 2));
+    }
 
-        Map<Integer, Integer> map = new HashMap<>();
-        int[] as = new int[]{1, 2, 5, 62, 1, 2, 4};
-        Set<Integer> as1 = Arrays.stream(as).parallel().boxed().collect(Collectors.toSet());
-
-        int[] bs = new int[]{1, 2, 5, 5, 7, 9, 62, 1, 2, 4};
-        Set<Integer> ls = new HashSet<>();
-        for (int b : bs) {
-            if (!as1.contains(b)) {
-                ls.add(b);
-            }
-        }
-       /* for (int a : as) {
-            map.put(a, map.getOrDefault(a, 0) + 1);
-        }
-        for (int b : bs) {
-            if (map.get(b) == null) {
-                ls.add(b);
-            } else {
-                map.put(b, map.get(b) - 1);
-                 if (map.get(b) == 0) {
-                     map.remove(b);
-                 }
-            }
-        }
-        map.forEach((k, v) -> {
-            for (Integer i = 0; i < v; i++) {
-                ls.add(k);
-            }
-        });*/
-        System.out.println(Arrays.toString(ls.toArray()));
+    @Test
+    void testCourseValidateInputException() throws Exception {
+        ErrorResponse errorResponse = new ErrorResponse("400", "Invalid data request");
+        mockMvc.perform(post(URI_COURSE)
+                .content(objectMapper.writeValueAsString(courseRegisterInvalid))
+                .contentType("application/json"))
+              .andExpect(status().isBadRequest())
+              .andExpect(responseBody.containsObjectAsJson(errorResponse, ErrorResponse.class));
     }
 
 
