@@ -55,11 +55,10 @@ public final class CourseSpecification {
 
     public static Specification<Course> hasStudentEmail(String studentEmail) {
         return ((Root<Course> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) -> {
-           Join<Course, Student> courseStudentJoin = root.join(Course_.STUDENT);
-           criteriaQuery.distinct(true);
-           return criteriaBuilder.equal(courseStudentJoin.get(Student_.EMAIL), studentEmail);
-        }
-        );
+            Join<Course, Student> courseStudentJoin = root.join(Course_.STUDENT);
+            criteriaQuery.distinct(true);
+            return criteriaBuilder.equal(courseStudentJoin.get(Student_.EMAIL), studentEmail);
+        });
     }
 
     public static Specification<Course> filter(String courseName, int courseSize, LocalDate dateInter) {

@@ -1,7 +1,5 @@
 package com.osc.school.controller;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.osc.school.model.entity.Course;
 import com.osc.school.model.entity.Student;
@@ -22,25 +20,25 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
-import static org.assertj.core.api.Assertions.linesOf;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.assertj.core.api.BDDAssertions.then;
 
@@ -54,6 +52,9 @@ class CourseControllerTest {
 
     @Captor
     ArgumentCaptor<Object> argumentCaptor;
+
+    @Captor
+    ArgumentCaptor<Object> argumentCaptorParam;
 
     @Captor
     private ArgumentCaptor<CourseFilter> filterArgumentCaptor;
@@ -72,6 +73,9 @@ class CourseControllerTest {
 
     @Mock
     private CourseFilter courseFilterInvalid;
+
+    private static final String URL_COURSE_STUDENTS = "/api/courses";
+    private static final String APPLICATION_JSON = "application/json";
 
     @BeforeEach
     void setUpTest() {
@@ -132,7 +136,7 @@ class CourseControllerTest {
         Mockito.when(courseService.findCourseByStudentEmail(Mockito.anyString())).thenReturn(courseRequest);
         MvcResult mvcResult = mockMvc.perform(get("/api/courses")
                 .param("student-email", emailParams)
-                .contentType("application/json"))
+                .contentType(APPLICATION_JSON))
                 .andReturn();
         String contentAsString = mvcResult.getResponse().getContentAsString();
         then(contentAsString).isEqualTo(objectMapper.writeValueAsString(courseRequest));
@@ -143,10 +147,9 @@ class CourseControllerTest {
         ErrorResponse expectedErrorResponse = new ErrorResponse("400", "Invalid data input");
         mockMvc.perform(get("/api/courses")
                 .param("student-email", "taom")
-                .contentType("application/json"))
+                .contentType(APPLICATION_JSON))
                 .andExpect(responseBody.containsObjectAsJson(expectedErrorResponse, ErrorResponse.class));
     }
-
 
     @Test
     void testCourseFilterSerializationOK() throws Exception {
@@ -155,7 +158,7 @@ class CourseControllerTest {
                 .param("size", "10")
                 .param("sort", "id,desc")
                 .content(objectMapper.writeValueAsString(courseFilter))
-                .contentType("application/json"))
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
@@ -163,7 +166,7 @@ class CourseControllerTest {
     void testCourseFilterBusinessOK() throws Exception {
         mockMvc.perform(post(URI_COURSE_FILTER)
                 .content(objectMapper.writeValueAsString(courseFilter))
-                .contentType("application/json")
+                .contentType(APPLICATION_JSON)
                 .param("page", "1")
                 .param("size", "10")
                 .param("sort", "id,desc"))
@@ -188,7 +191,7 @@ class CourseControllerTest {
         ErrorResponse errorResponse = new ErrorResponse("400", "Invalid data request");
         mockMvc.perform(post(URI_COURSE_FILTER)
                 .content(objectMapper.writeValueAsString(courseFilterInvalid))
-                .contentType("application/json"))
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(responseBody.containsObjectAsJson(errorResponse, ErrorResponse.class));
     }
@@ -196,7 +199,7 @@ class CourseControllerTest {
     @Test
     void testRegisterCourseSerialization() throws Exception {
         mockMvc.perform(post(URI_COURSE)
-                .contentType("application/json")
+                .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(courseRegister)))
                 .andExpect(status().isOk());
     }
@@ -204,10 +207,10 @@ class CourseControllerTest {
     @Test
     void testRegisterCourseBusinessOK() throws Exception {
         mockMvc.perform(post(URI_COURSE)
-                    .content(objectMapper.writeValueAsString(courseRegister))
-                    .contentType("application/json"))
+                .content(objectMapper.writeValueAsString(courseRegister))
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk());
-        verify(courseService, times(1)).createCourse((Course)argumentCaptor.capture());
+        verify(courseService, times(1)).createCourse((Course) argumentCaptor.capture());
         Course courseRegistered = (Course) argumentCaptor.getValue();
         then(courseRegistered.getCourseName()).isEqualTo("Chibi");
         then(courseRegistered.getCourseSize()).isEqualTo(30);
@@ -220,10 +223,51 @@ class CourseControllerTest {
         ErrorResponse errorResponse = new ErrorResponse("400", "Invalid data request");
         mockMvc.perform(post(URI_COURSE)
                 .content(objectMapper.writeValueAsString(courseRegisterInvalid))
-                .contentType("application/json"))
-              .andExpect(status().isBadRequest())
-              .andExpect(responseBody.containsObjectAsJson(errorResponse, ErrorResponse.class));
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(responseBody.containsObjectAsJson(errorResponse, ErrorResponse.class));
     }
 
+    @Test
+    void testAddStudentSerializationOK() throws Exception {
+        Set<Long> studentIds = LongStream.of(1L).boxed().collect(Collectors.toCollection(HashSet::new));
+        mockMvc.perform(put(URL_COURSE_STUDENTS + "/1/students")
+                .content(objectMapper.writeValueAsString(studentIds))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testAddStudentValidatesThenReturn400() throws Exception {
+        Set<Long> studentIds = Collections.emptySet();
+        mockMvc.perform(put(URI_COURSE + "/1/students")
+                .content(objectMapper.writeValueAsString(studentIds))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testAddStudentBusinessOk() throws Exception {
+        Set<Long> studentIds = LongStream.of(1, 2, 3).boxed().collect(Collectors.toCollection(TreeSet::new));
+        mockMvc.perform(put(URL_COURSE_STUDENTS + "/1/" + "students")
+                .content(objectMapper.writeValueAsString(studentIds))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(courseService, times(1))
+                .addStudentsToCourse((Long) argumentCaptorParam.capture(), (Set<Long>) argumentCaptor.capture());
+        then((Long) argumentCaptorParam.getValue()).isEqualTo(1L);
+        then((Set<Long>) argumentCaptor.getValue()).isEqualTo(studentIds);
+    }
+
+    @Test
+    void testAddStudentHandleException() throws Exception {
+        ErrorResponse errorResponse = new ErrorResponse("400", "Invalid data input");
+        Set<Long> studentIds = Collections.emptySet();
+        mockMvc.perform(put(URI_COURSE + "/1/students")
+                .content(objectMapper.writeValueAsString(studentIds))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(responseBody.containsObjectAsJson(errorResponse, ErrorResponse.class));
+    }
 
 }

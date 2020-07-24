@@ -7,10 +7,9 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
 public class EmailValidatorCustom implements ConstraintValidator<Email, String> {
-   private static final Pattern emailPattern = Pattern.compile("^[a-z][a-z0-9_\\.]{4,32}@(nguy|thuc|ngo){1}(\\.[a-z0-9]{2,4}){1,2}$");
-   public void initialize(Email constraint) {
-   }
+   private static final Pattern emailPattern = Pattern.compile("^[a-z][a-z0-9_\\.]{4,32}@(nguy|thuc|ngo)(\\.[a-z0-9]{2,4}){1,2}$");
 
+   @Override
    public boolean isValid(String email, ConstraintValidatorContext context) {
       return Strings.isNotEmpty(email) && emailPattern.matcher(email).matches();
    }

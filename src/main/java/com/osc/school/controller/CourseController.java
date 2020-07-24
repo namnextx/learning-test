@@ -14,12 +14,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import java.util.Set;
 
 
 @RestController
@@ -42,14 +45,21 @@ public class CourseController {
     }
 
     @PostMapping
-    public ResponseEntity<HttpStatus> createCourse(@Valid @RequestBody Course course) {
+    public ResponseEntity<Object> createCourse(@Valid @RequestBody Course course) {
         courseService.createCourse(course);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<Course> findCourseById(@PathVariable("id") long id) {
         Course course = courseService.findCourseByCourseId(id);
         return new ResponseEntity<>(course, HttpStatus.OK);
+    }
+
+    @PutMapping(value ="/{id}/students")
+    public ResponseEntity<HttpStatus> addStudentsToCourse(@NotEmpty @RequestBody Set<Long> studentIds,
+                                                          @PathVariable(value = "id") Long courseId) {
+        courseService.addStudentsToCourse(courseId, studentIds);
+        return ResponseEntity.ok().build();
     }
 }

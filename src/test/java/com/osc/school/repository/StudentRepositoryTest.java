@@ -10,7 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @DataJpaTest
-public class StudentRepositoryTest {
+class StudentRepositoryTest {
     @Autowired
     private StudentRepository studentRepository;
 

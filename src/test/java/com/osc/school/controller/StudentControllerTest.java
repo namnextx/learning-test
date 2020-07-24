@@ -46,8 +46,7 @@ class StudentControllerTest {
     @BeforeEach
     void setupTest() {
         studentValid = new Student(null, "Tao Manh Duc", "taomd@nguy.com", "truong an", null);
-        studentInvalid = new Student();//null, "", "");
-        studentInvalid.setName("abc");
+        studentInvalid = new Student(null, "", "","", null);
         MockitoAnnotations.initMocks(this);
     }
 
