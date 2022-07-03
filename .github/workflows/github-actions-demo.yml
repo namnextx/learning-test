@@ -33,8 +33,4 @@ jobs:
           maven-repo-server-password: ${GITHUB_TOKEN}
           maven-release-args: "-Dskip.unit.tests=true -Dskip.integration.tests=true"
 
-          # Publish artifacts to GitHub Packages
-          maven-publish-args: "-Dskip.unit.tests=true -Dskip.integration.tests=true"
-          maven-release-publish: "true"
-          maven-snapshot-publish: "true"
 
