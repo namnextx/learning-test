@@ -9,16 +9,16 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-#      - name: Setup JDk 11
-#        if: success()
-#        uses: actions/setup-java@v2
-#        with:
-#          java-version: '11'
-#          distribution: 'temurin'
-#          cache: maven
-#      - name: Build and Unit test
-#        if: success()
-#        run: mvn clean install
+      - name: Setup JDk 11
+        if: success()
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+      - name: Build and Unit test
+        if: success()
+        run: mvn clean install
       - name: Release
         uses: mg-smartrent/github-actions-maven-release@v2.6
         with:
@@ -27,10 +27,8 @@ jobs:
           git-release-bot-email: "release.bot@smartrent.com"
           access-token: ${GITHUB_TOKEN}
 
-          # Release
-          maven-repo-server-id: ${MAVEN_SERVER_ID}
-          maven-repo-server-username: ${GITHUB_USERNAME}
-          maven-repo-server-password: ${GITHUB_TOKEN}
-          maven-release-args: "-Dskip.unit.tests=true -Dskip.integration.tests=true"
-
+          # Publish artifacts to GitHub Packages
+          maven-publish-args: "-Dskip.unit.tests=true -Dskip.integration.tests=true"
+          maven-release-publish: "true"
+          maven-snapshot-publish: "true"
 
