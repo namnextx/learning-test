@@ -1,0 +1,60 @@
+name: Development Workflow
+on:
+  push:
+    branches: [ develop ]
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ghcr.io/namnextx/${{ github.event.repository.name }}
+    ENV_DEPLOY: dev
+jobs:
+  development-cicd:
+    environment: Development Environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+          ref: develop
+          path: main
+      - name: Set up JDK 1.8
+        if: success()
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'remurin'
+          cache: maven
+      - name: Build and Unit test
+        if: success()
+        working-directory: main
+        run: mvn clean install
+
+      # Build and push docker image on Github registry
+      - name: Setup docker Buildx
+        if: ${{ success() }}
+        uses: docker/setup-builx-action@1
+      - name: Login to the Container registry
+        if: ${{ success() }}
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for docker
+        id: meta
+        uses: docker/metadata-action@v3.6.2
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha, enable=true, prefix=${{ env.ENV_DEPLOY }}-
+      - name: Build and push docker image
+        if: ${{ success() }}
+        uses: docker/build-push-action@v2
+        with:
+          context: main
+          file: ./main/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+         # build-args: JAVA_OPTS=${{ secrets.DOCKER_JAVA_OPTIONS }}
