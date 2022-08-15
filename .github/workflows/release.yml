@@ -20,8 +20,8 @@ jobs:
           cache: maven
       - name: Configure Git user
         run: |
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
+          git config user.email "phuongnam.nextx@gmail.com"
+          git config user.name "NamNextx"
       - name: Publish JAR
         run: ./mvnw -B release:prepare release:perform
         env:
