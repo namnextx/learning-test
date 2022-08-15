@@ -9,7 +9,7 @@
     </parent>
     <groupId>com.osc</groupId>
     <artifactId>school</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.5-SNAPSHOT</version>
     <name>school</name>
     <description>Management school</description>
 
@@ -127,6 +127,8 @@
                 <version>3.0.0-M1</version>
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <branchName>develop</branchName>
+                    <localCheckout>true</localCheckout>
                 </configuration>
             </plugin>
         </plugins>
@@ -136,5 +138,12 @@
         <developerConnection>scm:git:https://github.com/NamNextx/learning-test.git</developerConnection>
       <tag>HEAD</tag>
   </scm>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub</name>
+            <url>https://maven.pkg.github.com/NamNextx/learning-test</url>
+        </repository>
+    </distributionManagement>
 
 </project>
