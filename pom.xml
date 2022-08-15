@@ -9,7 +9,7 @@
     </parent>
     <groupId>com.osc</groupId>
     <artifactId>school</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>school</name>
     <description>Management school</description>
 
@@ -136,7 +136,7 @@
 
     <scm>
         <developerConnection>scm:git:https://github.com/NamNextx/learning-test.git</developerConnection>
-      <tag>HEAD</tag>
+      <tag>v0.0.1</tag>
   </scm>
     <distributionManagement>
         <repository>
