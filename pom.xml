@@ -133,7 +133,6 @@
         </plugins>
     </build>
 
-
     <scm>
         <developerConnection>scm:git:https://github.com/NamNextx/learning-test.git</developerConnection>
     </scm>
